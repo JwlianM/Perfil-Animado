@@ -1,6 +1,6 @@
 // CONFIGURAÇÃO DOS TEXTOS
 const nomeParaDigitar = "Jott4 rei delaxs";
-const textoParaDigitar = "Tudo posso naquelE que me fortalece!";
+const textoParaDigitar = "Tudo posso naquEle que me fortalece!";
 const novaMensagemParaDigitar = "Filipenses 4:13";
 const titulosDaAba = ["Jott4"]; // As mensagens que vão ficar alternando
 
