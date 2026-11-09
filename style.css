@@ -1,0 +1,614 @@
+@font-face {
+    font-family: 'Angel_wish';
+    src: url('/assets/Angel_wish.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #f1f6f7;
+    --secondary-color: #6b6a6a;
+    --background-color: #080812;
+    --text-color: #ffffff;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: var(--background-color);
+    color: var(--text-color);
+    min-height: 100vh;
+    overflow: hidden;
+
+    /* A SOLUÇÃO: Centralização moderna via Flexbox na caixa principal */
+    display: flex;
+    justify-content: center; /* Centraliza na horizontal */
+    align-items: center;     /* Centraliza na vertical */
+    position: relative;
+}
+
+
+/* FUNDO COMPLETO */
+.background-video {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
+}
+
+/* FUNDO */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.60);
+    z-index: -1;
+}
+
+/* =======================================================
+   TELA DE ENTRADA AJUSTADA (HOVER APENAS NO BOTÃO)
+   ======================================================= */
+#entrance {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    background: #04040aee; 
+    z-index: 100;
+    cursor: pointer;
+    transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.8s;
+}
+
+/* O BOTÃO CENTRAL DE ENTRADA (MUDADO PARA SÓ REAGIR NO CONTATO DIRETO) */
+#entrance h1 {
+    font-family: Arial, sans-serif;
+    color: #ffffff;
+    font-size: 18px; /* Reduzido um tico para o botão ficar mais compacto */
+    font-weight: 600;
+    letter-spacing: 6px;
+    padding: 16px 36px; /* Diminuído o estofamento interno para encolher o botão */
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(239, 243, 243, 0.3); 
+    border-radius: 50px; 
+    box-shadow: 0 0 20px rgba(238, 241, 241, 0.1);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+/* CORREÇÃO DO RANGE: Agora a mágica e o brilho SÓ acontecem se o mouse encostar no H1 */
+#entrance h1:hover {
+    transform: scale(1.03);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 35px rgba(242, 243, 243, 0.5), inset 0 0 15px rgba(0, 206, 209, 0.2);
+    color: var(--primary-color); 
+}
+
+/* TEXTO DE BAIXO (PULSANTE INDEPENDENTE) */
+#entrance p {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    animation: pulseEntrada 2s ease-in-out infinite;
+}
+
+/* PERFIL */
+/* 1. CARD PRINCIPAL (Garante a centralização e o tamanho fixo) */
+/* 1. CARD PRINCIPAL (Agora permite que o nome e a foto saiam para fora) */
+.profile {
+    position: relative;
+    width: 550px;
+    max-width: 90%;
+    padding: 35px;
+    text-align: center;
+    border-radius: 20px;
+    opacity: 0;
+    display: none;
+    transition: opacity 0.8s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: visible; 
+    box-shadow: 0 0 35px rgba(240, 243, 243, 0.35);
+}
+
+/* Modificação no card ativo */
+.profile.active {
+    display: flex;
+    animation: surgirSuave 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    
+    /* Configura a transição para as propriedades individuais */
+    transition: scale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                translate 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                box-shadow 0.4s ease;
+}
+
+
+/* 2. A CAMADA DO LED + VIDRO DO FUNDO (Ela sim segura o giro e o corte redondo) */
+.profile::before {
+    content: '';
+    position: absolute;
+    inset: 0; /* Ocupa o tamanho exato do card */
+    border-radius: 20px;
+    
+    /* CORREÇÃO DO LED: O overflow e a animação do giro agora rodam de forma segura isolados aqui */
+    overflow: hidden;
+    padding: 2px; /* Define a espessura exata da linha do LED */
+    background: conic-gradient(from var(--led-angulo, 0deg), var(--primary-color), #002b2c 25%, var(--primary-color) 50%, #002b2c 75%, var(--primary-color) 100%);
+    animation: girarLed 4s linear infinite;
+    
+    /* Cria a máscara interna do Liquid Glass cortando o centro e deixando só a bordinha */
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    z-index: 0;
+}
+
+/* 3. CAMADA DE COR DE FUNDO TRANSLÚCIDA DO VIDRO LÍQUIDO */
+/* Criamos essa div interna temporária via CSS para dar o tom escuro de vidro sem sumir com nada */
+.profile::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(10, 10, 25, 0.65));
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
+    border-radius: 18px;
+    z-index: -1; /* Fica atrás dos textos e botões */
+    pointer-events: none;
+}
+
+/* O EFEITO HOVER COM AUMENTO, SUBIDA E BALANÇO */
+.profile.active:hover {
+    scale: 1.15;
+    translate: 0 -12px;
+    box-shadow: 0 15px 50px rgba(244, 247, 247, 0.6);
+    
+    /* Ativa o balanço: dura 2.5 segundos, é infinito e suaviza o vai e vem (ease-in-out) */
+    animation: surgirSuave 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards, 
+               balancoSuave 2.5s ease-in-out infinite;
+}
+
+
+
+
+.avatar {
+    position: absolute;
+    left: -64px;
+    top: calc(50% - 64px);
+    width: 128px;
+    height: 128px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary-color);
+    z-index: 10; /* Foto em destaque total na esquerda */
+}
+
+/* TEXTOS COM EFEITO MÁQUINA DE ESCREVER */
+#titulo {
+    font-family: 'Angel_wish', sans-serif;
+    color: var(--primary-color);
+    letter-spacing: 4px;
+    font-size: 32px;
+    display: table;
+    margin: -70px auto 15px;
+    border-right: 3px solid var(--primary-color);
+    white-space: nowrap; 
+    overflow: hidden;
+    vertical-align: bottom;
+    position: relative;
+    z-index: 5; /* Traz os textos e botões para a frente */
+}
+
+#titulo.sem-cursor {
+    border-right-color: transparent !important;
+    position: relative;
+    z-index: 5; /* Traz os textos e botões para a frente */
+}
+
+.bio {
+    margin: 10px auto 25px;
+    color: #ccc;
+    font-size: 18px;
+    display: table;
+    white-space: nowrap;
+    overflow: hidden;
+    letter-spacing: 4px;
+    border-right: 3px solid transparent;
+    vertical-align: bottom;
+    position: relative;
+    z-index: 5; /* Traz os textos e botões para a frente */
+}
+
+.bio.digitando {
+    border-right: 3px solid var(--primary-color);
+}
+
+/* ESTILO DA NOVA MENSAGEM (MÁQUINA DE ESCREVER 3) */
+.nova-msg {
+    margin: -20px auto 25px; /* Espaçamento equilibrado */
+    color: var(--primary-color); /* Você pode usar #ccc ou a cor ciano */
+    font-size: 16px; /* Um pouco menor para dar hierarquia */
+    display: table;
+    white-space: nowrap;
+    overflow: hidden;
+    letter-spacing: 3px;
+    border-right: 3px solid transparent;
+    text-align: center;
+    position: relative;
+    z-index: 5;
+}
+
+/* Ativa o cursor piscando quando começar a digitar */
+.nova-msg.digitando {
+    border-right: 3px solid var(--primary-color);
+}
+
+
+/* REDES SOCIAIS */
+.social-links {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 25px; /* Aumentamos o espaço para as sombras não baterem uma na outra */
+    margin-top:-10px;
+    position: relative;
+    z-index: 1; /* Traz os textos e botões para a frente */
+}
+
+
+/* ESTRUTURA BASE DO BOTÃO (CAIXA MÃE SEGURO DE POSIÇÃO) */
+.social-btn {
+    position: relative;
+    width: 65px;
+    height: 65px;
+    display: block;
+    text-decoration: none;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* CAMADA DE TRÁS: O BLOCO COLORIDO BORRADO */
+.btn-bg {
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    transform: scale(0.9) translate(0, 0);
+    filter: blur(0px); /* Começa nítido por trás */
+    opacity: 0.8;
+    transition: transform 0.4s, filter 0.4s, opacity 0.4s;
+    z-index: 1;
+}
+
+/* CAMADA DA FRENTE: O VIDRO TRANSLÚCIDO (GLASSMORPHISM) */
+.btn-glass {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.08); /* Fundo branco bem transparente */
+    backdrop-filter: blur(12px);          /* Faz o efeito de vidro fosco */
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15); /* Borda fina simulando o reflexo do vidro */
+    border-radius: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2; /* Fica por cima do fundo colorido */
+    transition: border-color 0.3s;
+}
+
+/* TAMANHO E COR DOS ÍCONES DENTRO DO VIDRO */
+.btn-glass i {
+    font-size: 32px;
+    color: #ffffff;
+    transition: transform 0.4s;
+}
+
+/* CORES PERSONALIZADAS PARA O FUNDO DE CADA REDE */
+.instagram .btn-bg {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+
+.discord .btn-bg {
+    background: #5865F2;
+}
+
+.github .btn-bg {
+    background: #24292e;
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Ajuda a destacar o fundo preto */
+}
+
+/* =====================================
+   O EFEITO AO PASSAR O MOUSE (HOVER) -
+   ===================================== */
+
+/* 1. O botão inteiro dá uma leve inclinada/subida */
+.social-btn:hover {
+    transform: translateY(-5px) scale(1.05);
+}
+
+/* 2. O fundo colorido vai para trás, rotaciona e fica mega borrado (Igual a segunda imagem!) */
+.social-btn:hover .btn-bg {
+    transform: scale(0.95) translate(12px, 12px) rotate(15deg); /* Desloca e gira o fundo */
+    filter: blur(8px); /* Cria o brilho neon borrado ao fundo */
+    opacity: 0.9;
+}
+
+/* 3. A bordinha do vidro fica mais acesa com a cor do ícone */
+.instagram:hover .btn-glass { border-color: rgba(220, 39, 67, 0.6); }
+.discord:hover .btn-glass { border-color: rgba(88, 101, 242, 0.6); }
+.github:hover .btn-glass { border-color: rgba(255, 255, 255, 0.4); }
+
+/* 4. O ícone ganha um leve destaque */
+.social-btn:hover .btn-glass i {
+    transform: scale(1.1);
+}
+
+/* Configuração universal para os novos ícones SVG */
+.icon-svg {
+    width: 32px;
+    height: 32px;
+    color: #ffffff !important;
+    z-index: 3;
+    transition: transform 0.4s;
+}
+
+/* Garante o efeito de zoom no hover também para os SVGs */
+.social-btn:hover .icon-svg {
+    transform: scale(1.1);
+}
+
+/* CONTROLE DE MÚSICA */
+/* CONTROLE DE ÁUDIO MINIMALISTA (AGORA TOTALMENTE ESCONDIDO NO INÍCIO) */
+.music-control {
+    position: fixed;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%); /* Garante a centralização na base */
+    display: none; /* <-- TRAVA: Começa totalmente invisível e sumido da tela */
+    align-items: center;
+    gap: 15px;
+    padding: 10px 20px;
+    background: rgba(10, 10, 25, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    z-index: 90;
+}
+
+/* ATIVADO APENAS APÓS O CLIQUE NA TELA DE ENTRADA */
+.music-control.active {
+    display: flex; /* Libera o elemento na tela */
+    /* Executa a animação de subir suave debaixo da tela */
+    animation: surgirPlayer 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; 
+}
+
+
+
+/* DESIGN DA BARRINHA (SLIDER) */
+#volume-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100px;
+    height: 4px; /* Barrinha bem fina e discreta */
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+#volume-slider:hover {
+    background: rgba(255, 255, 255, 0.3); /* Acende de leve no hover */
+}
+
+/* DESIGN DA BOLINHA DE ARRASTAR (Para Navegadores Chrome, Edge, Safari, Opera) */
+#volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--primary-color); /* Bolinha ganha a sua cor ciano */
+    box-shadow: 0 0 8px var(--primary-color); /* Leve brilho neon na bolinha */
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#volume-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.3); /* Aumenta de leve quando passa o mouse */
+}
+
+/* DESIGN DA BOLINHA DE ARRASTAR (Para o Firefox) */
+#volume-slider::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border: none;
+    border-radius: 50%;
+    background: var(--primary-color);
+    box-shadow: 0 0 8px var(--primary-color);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#volume-slider::-moz-range-thumb:hover {
+    transform: scale(1.3);
+}
+
+/* ESTILO DA PORCENTAGEM (%) */
+#volume-value {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--primary-color); /* Texto em ciano combinando com o tema */
+    min-width: 35px;
+    letter-spacing: 1px;
+}
+
+/* =======================================================
+   ESTEIRA DE LOGOS DOS JOGOS (ANIMAÇÃO INFINITA)
+   ======================================================= */
+
+.games-carousel {
+    width: 280px; /* Largura máxima que a esteira vai ocupar na tela */
+    overflow: hidden; /* Esconde os logos que estão vindo do lado */
+    margin: 15px 20px -15px; /* Centraliza e ajusta o espaço perto do nome */
+    position: relative;
+    z-index: 5;
+    /* Cria um efeito de fumaça/apagado nas pontas para os logos surgirem suavemente */
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, #fff 20%, #fff 80%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0%, #fff 20%, #fff 80%, transparent 100%);
+}
+
+.games-track {
+    display: flex;
+    align-items: center;
+    gap: 25px; /* Espaço entre cada logo de jogo */
+    width: max-content;
+    /* Chama a animação 'rolarJogos' de 12 segundos, em velocidade constante (linear) e infinita */
+    animation: rolarJogos 12s linear infinite;
+}
+
+.games-track img {
+    height: 20px; /* Altura padrão para nenhum logo ficar gigante ou desalinhado */
+    width: auto;
+    object-fit: contain;
+    opacity: 0.6; /* Fica meio transparente para combinar com o Liquid Glass */
+    filter: drop-shadow(0 0 5px rgba(0, 206, 209, 0.3)); /* Leve reflexo neon ciano nos logos */
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+/* Quando passar o mouse em cima de qualquer logo, ele acende e cresce */
+.games-track img:hover {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+/* Pausa a esteira se você colocar o mouse por cima para olhar o logo */
+.games-carousel:hover .games-track {
+    animation-play-state: paused;
+}
+
+/* Quando passar o mouse no carrossel, acende todos os logos de uma vez */
+.games-carousel:hover .games-track img {
+    opacity: 1; /* Remove a transparência */
+    filter: drop-shadow(0 0 12px rgba(237, 240, 240, 0.8)); /* Deixa o neon ciano bem vivo */
+}
+
+
+
+/* ANIMAÇÕES */
+@keyframes pulse {
+    50% { opacity: 0.2; }
+}
+
+@keyframes piscarCursor {
+    from, to { border-color: transparent }
+    50% { border-color: var(--primary-color); }
+}
+
+.piscar {
+    animation: piscarCursor 0.75s step-end infinite;
+}
+
+/* CELULAR */
+@media (max-width: 600px) {
+    .profile { padding: 25px 15px; }
+    #titulo { font-size: 26px; }
+    .bio { font-size: 14px; }
+    .music-control { bottom: 15px; }
+}
+
+/* =======================================================
+   A CONFIGURAÇÃO DA ANIMAÇÃO DO LED GIRATÓRIO NATIVO
+   ======================================================= */
+@property --led-angulo {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+
+@keyframes girarLed {
+    0% {
+        --led-angulo: 0deg;
+    }
+    100% {
+        --led-angulo: 360deg;
+    }
+}
+
+/* =======================================================
+   ANIMAÇÕES DE ENTRADA SUAVE (FADE-IN)
+   ======================================================= */
+
+/* O perfil começa invisível e 30px mais abaixo, terminando no lugar certo */
+@keyframes surgirSuave {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* O player de música entra vindo debaixo da tela de forma fluida */
+@keyframes surgirPlayer {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, 40px);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+/* =======================================================
+   A MÁGICA DA ROLAGEM SÉRIE INFINITA
+   ======================================================= */
+@keyframes rolarJogos {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        /* Desloca exatamente metade da largura total da pista, criando o looping invisível */
+        transform: translateX(-50%);
+    }
+}
+
+/* ANIMAÇÃO DE PULSAR SUAVE */
+@keyframes pulseEntrada {
+    0%, 100% { opacity: 0.3; transform: scale(0.98); }
+    50% { opacity: 0.7; transform: scale(1); }
+}
+
+/* ANIMAÇÃO DE BALANÇO SUAVE */
+@keyframes balancoSuave {
+    0%, 100% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(-0.8deg); /* Inclina de leve para a esquerda */
+    }
+    75% {
+        transform: rotate(0.8deg);  /* Inclina de leve para a direita */
+    }
+}
+
+
+
